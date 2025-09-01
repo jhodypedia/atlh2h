@@ -1,35 +1,31 @@
-// File: api/deposit.js
-import axios from "axios";
-import qs from "qs";
-
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { api_key, reff_id, nominal, type, metode } = req.body;
-
-  // Validasi input
-  if (!api_key || !reff_id || !nominal || !type || !metode) {
-    return res.status(400).json({ error: "Semua field wajib diisi!" });
-  }
-  if (isNaN(nominal) || nominal <= 0) {
-    return res.status(400).json({ error: "Nominal harus angka lebih dari 0" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const response = await axios.post(
-      "https://atlantich2h.com/deposit/create",
-      qs.stringify({ api_key, reff_id, nominal, type, metode }),
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      }
-    );
+    // Pastikan body diterima dalam format x-www-form-urlencoded
+    const body = typeof req.body === 'string'
+      ? req.body
+      : new URLSearchParams(req.body).toString();
 
-    return res.status(200).json(response.data);
-  } catch (error) {
-    return res.status(500).json({
-      error: error.response?.data || error.message
+    // Proxy request ke API Atlantic
+    const response = await fetch('https://atlantich2h.com/deposit/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
     });
+
+    const contentType = response.headers.get('content-type') || '';
+    let data;
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+
+    res.status(response.status).json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }
