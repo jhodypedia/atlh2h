@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Deposit - Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 20px;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+      color: #444;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    input:focus, select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    button {
+      width: 100%;
+      background: #007bff;
+      color: #fff;
+      font-size: 16px;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .response-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f8ff;
+      border: 1px solid #cce5ff;
+      border-radius: 6px;
+      max-height: 300px;
+      overflow: auto;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🚀 Create Deposit Test</h2>
+    <form id="depositForm">
+      <div class="form-group">
+        <label>API Key</label>
+        <input type="text" name="api_key" required>
+      </div>
+      <div class="form-group">
+        <label>Reff ID</label>
+        <input type="text" name="reff_id" placeholder="contoh: reff123" required>
+      </div>
+      <div class="form-group">
+        <label>Nominal</label>
+        <input type="number" name="nominal" min="1000" required>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type" required>
+          <option value="">-- Pilih Type --</option>
+          <option value="ewallet">E-Wallet</option>
+          <option value="va">Virtual Account</option>
+          <option value="bank">Bank Transfer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Metode</label>
+        <input type="text" name="metode" placeholder="contoh: qris" required>
+      </div>
+      <button type="submit">Create Deposit</button>
+    </form>
+
+    <div class="response-box" id="responseBox" style="display:none;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("depositForm");
+    const responseBox = document.getElementById("responseBox");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      responseBox.style.display = "block";
+      responseBox.textContent = "⏳ Mengirim request...";
+
+      const formData = Object.fromEntries(new FormData(form).entries());
+
+      // Validasi manual tambahan
+      if (!formData.api_key.trim() || !formData.reff_id.trim() || !formData.nominal.trim() || !formData.type.trim() || !formData.metode.trim()) {
+        responseBox.textContent = "❌ Semua field wajib diisi!";
+        return;
+      }
+      if (isNaN(formData.nominal) || Number(formData.nominal) <= 0) {
+        responseBox.textContent = "❌ Nominal harus berupa angka > 0!";
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/deposit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        responseBox.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        responseBox.textContent = "⚠️ Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
