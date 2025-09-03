@@ -1,138 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Deposit - Atlantic Test</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WA Blast Manager</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.min.css" rel="stylesheet"/>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f6fa;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    :root{
+      --bg:#0e0f13; --card:#151821cc; --glass:#101218bf;
+      --accent:#6be675; --accent2:#56ccf2;
+      --text:#e9eef3; --muted:#a9b3c2;
+      --danger:#ff6b6b;
     }
-    .container {
-      max-width: 480px;
-      width: 100%;
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-      color: #34495e;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #bdc3c7;
-      font-size: 14px;
-    }
-    input:focus, select:focus {
-      border-color: #3498db;
-      outline: none;
-    }
-    button {
-      background: #3498db;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #2980b9;
-    }
-    pre {
-      background: #ecf0f1;
-      padding: 15px;
-      border-radius: 6px;
-      font-size: 13px;
-      max-height: 250px;
-      overflow: auto;
-    }
-    .error { color: red; }
+    body{font-family:'Poppins',sans-serif;background:#0e0f13;color:var(--text);}
+    .brand{font-weight:800;display:flex;align-items:center;gap:.6rem;}
+    .brand .logo{width:42px;height:42px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:grid;place-items:center;}
+    .cardx{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.06);border-radius:18px;backdrop-filter:blur(10px);margin-bottom:20px;}
+    .cardx .header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06);font-weight:600;}
+    .cardx .body{padding:20px;}
+    .btnx{border:none;border-radius:12px;padding:12px 16px;font-weight:600;color:#0b0c10;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));transition:.15s;}
+    .btnx:active{transform:scale(.97);}
+    .field{margin-bottom:14px;}
+    .field label{color:var(--muted);font-size:.9rem;margin-bottom:6px;}
+    .field input,.field textarea,.field select{width:100%;background:#0b0d12;
+      border:1px solid rgba(255,255,255,.08);color:var(--text);border-radius:12px;
+      padding:12px 14px;}
+    .loading{position:fixed;inset:0;display:none;place-items:center;z-index:9999;
+      background:rgba(14,15,19,.85);}
+    .loader{padding:16px 18px;border-radius:14px;background:rgba(255,255,255,.09);
+      font-weight:600;display:flex;align-items:center;gap:14px;}
+    .loader i{animation:spin 1s linear infinite;} @keyframes spin{to{transform:rotate(360deg);}}
+    .pill{font-size:.8rem;padding:6px 10px;border-radius:999px;background:rgba(107,230,117,.12);color:#bdf3c5;}
+    .logs-table td,.logs-table th{color:var(--text);}
+    .note{color:var(--muted);font-size:.85rem;}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Create Deposit</h2>
-    <form id="depositForm">
-      <label>API Key</label>
-      <input name="api_key" placeholder="API Key" required>
+<div class="loading" id="loading"><div class="loader"><i class="fa fa-spinner"></i> Mengirim blast…</div></div>
 
-      <label>Reff ID</label>
-      <input name="reff_id" id="reff_id" readonly>
-
-      <label>Nominal</label>
-      <input name="nominal" type="number" placeholder="50000" min="1000" required>
-
-      <label>Type</label>
-      <select name="type" required>
-        <option value="">-- pilih type --</option>
-        <option value="ewallet">E-Wallet</option>
-        <option value="va">Virtual Account</option>
-        <option value="bank">Bank</option>
-      </select>
-
-      <label>Metode</label>
-      <select name="method" required>
-        <option value="">-- pilih metode --</option>
-        <option value="qris">QRIS</option>
-        <option value="gopay">GoPay</option>
-        <option value="dana">Dana</option>
-        <option value="ovo">OVO</option>
-      </select>
-
-      <button type="submit">Create Deposit</button>
-    </form>
-
-    <h3>Response:</h3>
-    <pre id="out"></pre>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="brand">
+      <div class="logo"><i class="fa-brands fa-whatsapp" style="color:#0b0c10;"></i></div>
+      <div><div style="font-size:1.25rem;">WA Blast Manager</div>
+        <div class="note">Baileys • jQuery • SweetAlert2</div></div>
+    </div>
+    <span id="connBadge" class="pill">Menunggu koneksi…</span>
   </div>
 
-  <script>
-    // Auto-generate reff_id
-    document.getElementById('reff_id').value = "DEP_" + Date.now();
+  <div class="row g-4">
+    <!-- QR LOGIN -->
+    <div class="col-lg-5">
+      <div class="cardx">
+        <div class="header"><i class="fa fa-qrcode"></i> Login WhatsApp</div>
+        <div class="body text-center">
+          <img id="qrImg" style="width:220px" alt="QR"/>
+          <div class="note mt-2">QR auto-refresh setiap 2 detik</div>
+        </div>
+      </div>
+    </div>
 
-    document.getElementById('depositForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const f = new FormData(e.target);
-      const body = new URLSearchParams();
+    <!-- BLAST FORM -->
+    <div class="col-lg-7">
+      <div class="cardx">
+        <div class="header"><i class="fa fa-bolt"></i> Kirim Blast</div>
+        <div class="body">
+          <form id="blastForm" enctype="multipart/form-data">
+            <div class="field"><label>Nomor Tujuan</label>
+              <textarea id="numbers" rows="2" placeholder="628123...,628456..."></textarea>
+            </div>
+            <div class="field"><label>Jenis Pesan</label>
+              <select id="type">
+                <option value="text">Text</option>
+                <option value="media">Media</option>
+                <option value="buttons">Tombol</option>
+                <option value="list">List</option>
+              </select>
+            </div>
+            <div class="field"><label>Isi Pesan</label>
+              <textarea id="text" rows="3"></textarea>
+            </div>
+            <div class="field" id="mediaBox" style="display:none;">
+              <label>Upload Media</label><input type="file" id="media"/>
+            </div>
+            <div id="extraBox"></div>
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+              <button class="btnx" type="submit"><i class="fa fa-paper-plane"></i> Kirim</button>
+              <button class="btnx" type="button" id="saveTpl"><i class="fa fa-save"></i> Simpan Template</button>
+              <button class="btnx" type="button" id="loadTpl"><i class="fa fa-folder-open"></i> Load Template</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      for (const [k, v] of f.entries()) {
-        if (!v.trim()) {
-          document.getElementById('out').textContent = "⚠️ Semua field wajib diisi";
-          return;
-        }
-        body.append(k, v);
+  <!-- LOGS -->
+  <div class="cardx">
+    <div class="header"><i class="fa fa-clipboard-list"></i> Log Blast</div>
+    <div class="body">
+      <table class="table table-dark table-sm logs-table">
+        <thead><tr><th>Waktu</th><th>Nomor</th><th>Status</th></tr></thead>
+        <tbody id="logsBody"><tr><td colspan="3">Belum ada log</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE="https://pansa.my.id";
+  const showLoading=b=>$("#loading").css("display",b?"grid":"none");
+
+  // === QR Polling ===
+  async function pollQR(){
+    try{
+      const r=await fetch(`${API_BASE}/qr`);
+      const d=await r.json();
+      if(d.qr){
+        $("#qrImg").attr("src",d.qr);
+        $("#connBadge").text("Belum login");
+      }else{
+        $("#qrImg").attr("src","");
+        $("#qrImg").replaceWith('<div class="text-success"><i class="fa fa-check-circle"></i> Terhubung!</div>');
+        $("#connBadge").text("Terhubung");
       }
+    }catch{ $("#connBadge").text("Server down"); }
+  }
+  setInterval(pollQR,2000); pollQR();
 
-      try {
-        const res = await fetch('/api/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body
-        });
-        const data = await res.json();
-        document.getElementById('out').textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById('out').textContent = 'Error: ' + err.message;
-      }
-    };
-  </script>
+  // === Type Change ===
+  $("#type").on("change",function(){
+    const val=$(this).val();$("#mediaBox").toggle(val==="media");$("#extraBox").empty();
+    if(val==="buttons") $("#extraBox").html('<div class="field"><label>Buttons JSON</label><textarea id="buttons" rows="4">[{"buttonId":"yes","buttonText":{"displayText":"Ya"},"type":1}]</textarea></div>');
+    if(val==="list") $("#extraBox").html('<div class="field"><label>List JSON</label><textarea id="list" rows="6">{ "text":"Pilih:","buttonText":"Lihat Opsi","sections":[{"title":"Menu","rows":[{"title":"A","rowId":"a1"}]}]}</textarea></div>');
+  });
+
+  // === Submit Blast ===
+  $("#blastForm").on("submit",async e=>{
+    e.preventDefault();
+    const type=$("#type").val(),nums=$("#numbers").val(),text=$("#text").val();
+    const f=new FormData(); f.append("numbers",nums); f.append("type",type); f.append("text",text);
+    if(type==="media"){ if($("#media")[0].files[0]) f.append("media",$("#media")[0].files[0]); }
+    if(type==="buttons") f.append("buttons",$("#buttons").val());
+    if(type==="list") f.append("list",$("#list").val());
+    try{
+      showLoading(true);
+      const r=await fetch(`${API_BASE}/blast`,{method:"POST",body:f});
+      const d=await r.json(); showLoading(false);
+      if(d.success) Swal.fire({icon:"success",title:"Blast sukses"});
+      else Swal.fire({icon:"error",title:"Gagal",text:d.error});
+    }catch(err){showLoading(false);Swal.fire({icon:"error",title:"Error",text:err.message});}
+  });
+
+  // === Logs Polling ===
+  async function loadLogs(){
+    try{
+      const r=await fetch(`${API_BASE}/logs`); const logs=await r.json();
+      let html=""; logs.forEach(l=>l.results.forEach(r=>{
+        html+=`<tr><td>${l.time}</td><td>${r.number}</td><td>${r.status=="success"?"✅ sukses":"❌ gagal"}</td></tr>`;
+      }));
+      $("#logsBody").html(html||"<tr><td colspan=3>Belum ada log</td></tr>");
+    }catch{}
+  }
+  setInterval(loadLogs,3000); loadLogs();
+
+  // === Template Manager ===
+  $("#saveTpl").on("click",()=>{
+    const tpl={numbers:$("#numbers").val(),type:$("#type").val(),text:$("#text").val(),
+      buttons:$("#buttons").val(),list:$("#list").val()};
+    localStorage.setItem("waTpl",JSON.stringify(tpl));
+    Swal.fire({icon:"success",title:"Template disimpan"});
+  });
+  $("#loadTpl").on("click",()=>{
+    const tpl=JSON.parse(localStorage.getItem("waTpl")||"null");
+    if(!tpl) return Swal.fire({icon:"warning",title:"Belum ada template"});
+    $("#numbers").val(tpl.numbers);$("#type").val(tpl.type).trigger("change");
+    $("#text").val(tpl.text); setTimeout(()=>{ $("#buttons").val(tpl.buttons);$("#list").val(tpl.list);},300);
+    Swal.fire({icon:"info",title:"Template dimuat"});
+  });
+</script>
 </body>
 </html>
